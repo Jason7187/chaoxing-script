@@ -6,6 +6,7 @@
 // @author       Jason7187
 // @match        *://*.chaoxing.com/*
 // @grant        none
+// @icon       	 https://github.com/Jason7187/chaoxing-script/blob/main/logo.png
 // @require      https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js
 // @updateURL    https://raw.githubusercontent.com/Jason7187/chaoxing-script/main/chaoxing-script.user.js
 // @downloadURL  https://raw.githubusercontent.com/Jason7187/chaoxing-script/main/chaoxing-script.user.js
