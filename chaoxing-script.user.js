@@ -184,7 +184,7 @@
                     <th style="width: 120px; padding: 12px; text-align: left; border-bottom: 2px solid #eee;">课程名称</th>
                     <th style="width: 100px; padding: 12px; text-align: left; border-bottom: 2px solid #eee;">课程ID</th>
                     <th style="width: 120px; padding: 12px; text-align: left; border-bottom: 2px solid #eee;">题型</th>
-                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #eee;">题目内容</th>
+                    <th style="width: 25%; padding: 12px; text-align: left; border-bottom: 2px solid #eee;">题目内容</th> <!-- 修改宽度 -->
                     <th style="width: 25%; padding: 12px; text-align: left; border-bottom: 2px solid #eee;">选项</th>
                     <th style="width: 35%; padding: 12px; text-align: left; border-bottom: 2px solid #eee; color: #28a745;">正确答案</th>
                 </tr>
@@ -234,7 +234,7 @@
         btn.textContent = '解析题目';
         btn.style.cssText = `
             position: fixed; top: 70px; right: 20px; z-index: 99999;
-            padding: 12px 24px; background: #FF5722; color: white;
+            padding: 12px 24px; background: #239b56 ; color: white;
             border: none; border-radius: 4px; cursor: pointer;
             box-shadow: 0 3px 6px rgba(0,0,0,0.16); transition: 0.2s;
         `;
