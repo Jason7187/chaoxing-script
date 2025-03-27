@@ -1,7 +1,7 @@
-// ==UserScript==
+// ==UserScript== 
 // @name         超星学习通自测题目解析导出工具
 // @namespace    http://tampermonkey.net/
-// @version      4.7
+// @version      4.8
 // @description  【普通制表符分隔|答案纯文本|多选###分隔|支持自测部分的单选、多选、判断、以及名词解释】
 // @author       Jason7187
 // @match        *://*.chaoxing.com/*
@@ -13,6 +13,13 @@
 // ==/UserScript==
 (function() {
     'use strict';
+
+    // 获取用户输入的课程名称和课程ID
+    const getCourseInfo = () => {
+        const courseName = prompt('请输入课程名称：');
+        const courseId = prompt('请输入课程ID：');
+        return { courseName, courseId };
+    };
 
     // 主解析函数
     const parseQuestions = () => {
@@ -37,12 +44,12 @@
         return results.filter(item => item.question);
     };
 
-    // 处理选择题
+    // 处理选择题，支持不限于ABCD等多个选项
     const handleChoice = (container, type, question) => {
         const options = Array.from(container.querySelectorAll('.mark_letter li'))
             .map(li => {
                 const text = li.textContent.trim();
-                return text.replace(/^([A-D])[．.。]?\s*/, '$1. ');
+                return text.replace(/^([A-Z])[．.。]?\s*/, '$1. ');
             });
 
         const optionMap = options.reduce((map, opt) => {
@@ -56,10 +63,10 @@
         let processedAnswer = '';
         if (rawAnswer) {
             processedAnswer = rawAnswer.split('')
-                .filter(c => /^[A-D]$/.test(c))
+                .filter(c => /^[A-Z]$/.test(c)) // 动态支持字母选项
                 .map(c => optionMap[c] || '')
                 .filter(Boolean)
-                .join(type === '多选题' ? ' ### ' : ' ');
+                .join(type === '多选题' ? ' ### ' : ' '); // 多选题使用" ### "分隔
         }
 
         return {
@@ -103,10 +110,13 @@
 
     // ================= 新版CSV导出功能 =================
     const exportToCSV = (data) => {
+        const { courseName, courseId } = getCourseInfo();  // 获取课程信息
         const TAB = '\t';  // 使用普通制表符
         const csvContent = [
-            ['题型', '题目内容', '选项', '正确答案'].join(TAB),  // 表头
+            ['课程名称', '课程ID', '题型', '题目内容', '选项', '正确答案'].join(TAB),  // 表头
             ...data.map(item => [
+                courseName,
+                courseId,
                 item.type,
                 item.question.replace(/"/g, '""'),
                 item.options.replace(/"/g, '""'),
@@ -126,7 +136,10 @@
 
     // ================= Excel导出功能 =================
     const exportToExcel = (data) => {
+        const { courseName, courseId } = getCourseInfo();  // 获取课程信息
         const worksheet = XLSX.utils.json_to_sheet(data.map(item => ({
+            '课程名称': courseName,
+            '课程ID': courseId,
             '题型': item.type,
             '题目内容': item.question,
             '选项': item.options,
@@ -141,7 +154,7 @@
     // ================= 预览功能 =================
     const showPreview = (data) => {
         const preview = document.createElement('div');
-        preview.style.cssText = `
+        preview.style.cssText = ` 
             position: fixed; top: 50px; left: 50%; 
             transform: translateX(-50%); width: 90%; max-width: 1200px; 
             height: 80vh; background: white; z-index: 99999; 
@@ -151,7 +164,7 @@
 
         const header = document.createElement('div');
         header.style.cssText = 'display: flex; justify-content: space-between; margin-bottom: 15px;';
-        header.innerHTML = `
+        header.innerHTML = ` 
             <h3 style="margin: 0; color: #333;">题目解析结果（共${data.length}题）</h3>
             <button style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666; padding: 0 10px;">&times;</button>
         `;
@@ -168,6 +181,8 @@
         table.innerHTML = `
             <thead>
                 <tr style="background: #f8f9fa;">
+                    <th style="width: 120px; padding: 12px; text-align: left; border-bottom: 2px solid #eee;">课程名称</th>
+                    <th style="width: 100px; padding: 12px; text-align: left; border-bottom: 2px solid #eee;">课程ID</th>
                     <th style="width: 120px; padding: 12px; text-align: left; border-bottom: 2px solid #eee;">题型</th>
                     <th style="padding: 12px; text-align: left; border-bottom: 2px solid #eee;">题目内容</th>
                     <th style="width: 25%; padding: 12px; text-align: left; border-bottom: 2px solid #eee;">选项</th>
@@ -177,6 +192,8 @@
             <tbody>
                 ${data.map(item => `
                     <tr style="border-bottom: 1px solid #eee;">
+                        <td style="padding: 12px; vertical-align: top;">${item.courseName}</td>
+                        <td style="padding: 12px; vertical-align: top;">${item.courseId}</td>
                         <td style="padding: 12px; vertical-align: top;">${item.type}</td>
                         <td style="padding: 12px; vertical-align: top;">${item.question}</td>
                         <td style="padding: 12px; vertical-align: top; white-space: pre-wrap;">${item.options.replace(/\|/g, '<br>')}</td>
