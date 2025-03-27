@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         超星学习通自测题目解析导出工具
 // @namespace    http://tampermonkey.net/
-// @version      4.6
+// @version      4.7
 // @description  【普通制表符分隔|答案纯文本|多选###分隔|支持自测部分的单选、多选、判断、以及名词解释】
 // @author       Jason7187
 // @match        *://*.chaoxing.com/*
