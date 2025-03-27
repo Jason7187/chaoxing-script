@@ -1,8 +1,8 @@
 // ==UserScript== 
-// @name         超星学习通自测题目解析导出工具
-// @namespace    http://tampermonkey.net/
-// @version      4.8
-// @description  【普通制表符分隔|答案纯文本|多选###分隔|支持自测部分的单选、多选、判断、以及名词解释】
+// @name         超星自测题目解析导出
+// @namespace    https://github.com/Jason7187/chaoxing-script/blob/main/README.md
+// @version      5.0
+// @description  【制表符分隔|答案纯文本|多选###分隔|仅支持自测部分的单选、多选、判断、以及名词解释】
 // @author       Jason7187
 // @match        *://*.chaoxing.com/*
 // @grant        none
