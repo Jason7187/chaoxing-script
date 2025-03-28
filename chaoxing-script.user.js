@@ -1,8 +1,9 @@
 // ==UserScript== 
 // @name         超星自测题目解析导出
 // @namespace    https://github.com/Jason7187/chaoxing-script/blob/main/README.md
-// @version      5.1
-// @description  【自动获取courseId | 制表符分隔| 答案纯文本 | 多选###分隔 | 仅支持自测部分的单选、多选、判断、以及名词解释】
+// @version      5.0
+// @description  【自动获取课程名称和课程id| 制表符分隔|答案纯文本|多选###分隔|仅支持自测部分的单选、多选、判断、以及名词解释】
+// 课程名称为自测标题
 // @author       Jason7187
 // @match        *://*.chaoxing.com/exam-ans/exam/test/*
 // @grant        none
@@ -10,23 +11,18 @@
 // @require      https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js
 // @updateURL    https://raw.githubusercontent.com/Jason7187/chaoxing-script/main/chaoxing-script.user.js
 // @downloadURL  https://raw.githubusercontent.com/Jason7187/chaoxing-script/main/chaoxing-script.user.js
-// ==/UserScript==
 
+// ==/UserScript==
 (function() {
     'use strict';
 
-    // 获取当前网址中的courseId
-    const getCourseIdFromURL = () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get('courseId') || '未知课程ID';
-    };
-
-    // 获取用户输入的课程名称，courseId自动填充
+    // 自动获取课程名称（从页面中的 <h2 class="mark_title"> 标签获取）和课程ID（从当前URL参数中获取）
     const getCourseInfo = () => {
-        const courseName = prompt('请输入课程名称：');
-        const courseId = getCourseIdFromURL();
+        const courseName = document.querySelector('h2.mark_title')?.textContent.trim() || '未知课程';
+        const courseId = new URLSearchParams(window.location.search).get('courseId') || '未知ID';
         return { courseName, courseId };
     };
+
     // 主解析函数
     const parseQuestions = () => {
         const results = [];
@@ -118,17 +114,15 @@
     const exportToCSV = (data) => {
         const { courseName, courseId } = getCourseInfo();  // 获取课程信息
         const TAB = '\t';  // 使用普通制表符
-        const csvContent = [
-            ['课程名称', '课程ID', '题型', '题目内容', '选项', '正确答案'].join(TAB),  // 表头
-            ...data.map(item => [
-                courseName,
-                courseId,
-                item.type,
-                item.question.replace(/"/g, '""'),
-                item.options.replace(/"/g, '""'),
-                item.answer.replace(/"/g, '""')
-            ].join(TAB))
-        ].join('\n');
+        // 去掉了第一行表头
+        const csvContent = data.map(item => [
+            courseName,
+            courseId,
+            item.type,
+            item.question.replace(/"/g, '""'),
+            item.options.replace(/"/g, '""'),
+            item.answer.replace(/"/g, '""')
+        ].join(TAB)).join('\n');
 
         const blob = new Blob(["\uFEFF" + csvContent], { 
             type: 'text/csv;charset=utf-8;' 
@@ -143,6 +137,7 @@
     // ================= Excel导出功能 =================
     const exportToExcel = (data) => {
         const { courseName, courseId } = getCourseInfo();  // 获取课程信息
+        // 传入 {skipHeader:true} 以去掉表头
         const worksheet = XLSX.utils.json_to_sheet(data.map(item => ({
             '课程名称': courseName,
             '课程ID': courseId,
@@ -150,7 +145,7 @@
             '题目内容': item.question,
             '选项': item.options,
             '正确答案': item.answer
-        })));
+        })), { skipHeader: true });
         
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, '题目数据');
@@ -190,7 +185,7 @@
                     <th style="width: 120px; padding: 12px; text-align: left; border-bottom: 2px solid #eee;">课程名称</th>
                     <th style="width: 100px; padding: 12px; text-align: left; border-bottom: 2px solid #eee;">课程ID</th>
                     <th style="width: 120px; padding: 12px; text-align: left; border-bottom: 2px solid #eee;">题型</th>
-                    <th style="width: 25%; padding: 12px; text-align: left; border-bottom: 2px solid #eee;">题目内容</th> <!-- 修改宽度 -->
+                    <th style="width: 25%; padding: 12px; text-align: left; border-bottom: 2px solid #eee;">题目内容</th>
                     <th style="width: 25%; padding: 12px; text-align: left; border-bottom: 2px solid #eee;">选项</th>
                     <th style="width: 35%; padding: 12px; text-align: left; border-bottom: 2px solid #eee; color: #28a745;">正确答案</th>
                 </tr>
@@ -198,8 +193,8 @@
             <tbody>
                 ${data.map(item => `
                     <tr style="border-bottom: 1px solid #eee;">
-                        <td style="padding: 12px; vertical-align: top;">${item.courseName}</td>
-                        <td style="padding: 12px; vertical-align: top;">${item.courseId}</td>
+                        <td style="padding: 12px; vertical-align: top;">${getCourseInfo().courseName}</td>
+                        <td style="padding: 12px; vertical-align: top;">${getCourseInfo().courseId}</td>
                         <td style="padding: 12px; vertical-align: top;">${item.type}</td>
                         <td style="padding: 12px; vertical-align: top;">${item.question}</td>
                         <td style="padding: 12px; vertical-align: top; white-space: pre-wrap;">${item.options.replace(/\|/g, '<br>')}</td>
@@ -253,9 +248,6 @@
 
         document.body.appendChild(btn);
     };
-
-    setTimeout(init, 2000);
-})();
 
     setTimeout(init, 2000);
 })();
