@@ -4,7 +4,7 @@
 // @version      5.0
 // @description  【制表符分隔|答案纯文本|多选###分隔|仅支持自测部分的单选、多选、判断、以及名词解释】
 // @author       Jason7187
-// @match        *://*.chaoxing.com/*
+// @match        *://*.chaoxing.com/exam-ans/exam/test/*
 // @grant        none
 // @icon       	 https://maxpcimg.online/i/2025/03/28/67e57f6648b39.png
 // @require      https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js
