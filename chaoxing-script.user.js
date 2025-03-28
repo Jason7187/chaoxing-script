@@ -1,9 +1,8 @@
 // ==UserScript== 
 // @name         超星自测题目解析导出
 // @namespace    https://github.com/Jason7187/chaoxing-script/blob/main/README.md
-// @version      5.0
-// @description  【自动获取课程名称和课程id| 制表符分隔|答案纯文本|多选###分隔|仅支持自测部分的单选、多选、判断、以及名词解释】
-// 课程名称为自测标题
+// @version      5.1
+// @description  【制表符分隔|答案纯文本|多选###分隔|支持自测部分的单选、多选、判断、名词解释及填空题】
 // @author       Jason7187
 // @match        *://*.chaoxing.com/exam-ans/exam/test/*
 // @grant        none
@@ -36,8 +35,9 @@
 
             if (['单选题', '多选题', '选择题'].includes(rawType)) {
                 results.push(handleChoice(container, rawType, question));
-            } else if (rawType === '名词解释') {
-                results.push(handleExplanation(container));
+            } else if (rawType === '名词解释' || rawType === '填空题') {
+                // 填空题和名词解释处理方法类似，但填空题需要额外去掉答案中的编号括号
+                results.push(handleExplanation(container, rawType));
             } else if (rawType === '判断题') {  // 新增判断题解析
                 results.push(handleJudgment(container, question));
             }
@@ -79,13 +79,30 @@
         };
     };
 
-    // 处理名词解释
-    const handleExplanation = (container) => ({
-        type: '名词解释',
-        question: container.querySelector('.qtContent').textContent.trim(),
-        options: '',
-        answer: container.querySelector('.mark_answer_key .colorGreen dd')?.textContent.trim() || ''
-    });
+    // 处理名词解释和填空题（两者处理方法相似，但填空题需处理答案中的括号编号）
+    const handleExplanation = (container, typeIndicator) => {
+        const question = container.querySelector('.qtContent')?.textContent.trim() || '';
+        let rawAnswer = '';
+        if (typeIndicator === '填空题') {
+            // 填空题答案在 mark_fill 中
+            rawAnswer = container.querySelector('.mark_fill.colorGreen dd')?.textContent.trim() || '';
+        } else {
+            // 名词解释答案在 mark_answer_key 中
+            rawAnswer = container.querySelector('.mark_answer_key .colorGreen dd')?.textContent.trim() || '';
+        }
+        let processedAnswer = rawAnswer;
+        if (typeIndicator === '填空题') {
+            // 匹配(1)、(2)等格式，并分割答案，去掉括号编号
+            let parts = rawAnswer.split(/(?:\(|（)\d+(?:\)|）)/).map(s => s.trim()).filter(Boolean);
+            processedAnswer = parts.join(' ### ');
+        }
+        return {
+            type: typeIndicator,
+            question: question,
+            options: '',
+            answer: processedAnswer
+        };
+    };
 
     // 处理判断题
     const handleJudgment = (container, question) => {
@@ -96,25 +113,25 @@
 
         // 判断选项并输出相应答案，删除字母，直接输出选项内容
         options.forEach(opt => {
-            const answerText = opt.replace(/^[A-D][．.。]?\s*/, '').trim(); // 去掉字母和多余的标点
+            const answerText = opt.replace(/^[A-D][．.。]?\s*/, '').trim();
             if (/正确|对|错误|错/.test(answerText)) {
-                answer = answerText;  // 输出选项中的答案内容
+                answer = answerText;
             }
         });
 
         return {
             type: '判断题',
             question: question,
-            options: options.join(' | '), // 判断题选项
+            options: options.join(' | '),
             answer: answer
         };
     };
 
     // ================= 新版CSV导出功能 =================
     const exportToCSV = (data) => {
-        const { courseName, courseId } = getCourseInfo();  // 获取课程信息
-        const TAB = '\t';  // 使用普通制表符
-        // 去掉了第一行表头
+        const { courseName, courseId } = getCourseInfo();
+        const TAB = '\t';
+        // 去掉第一行表头
         const csvContent = data.map(item => [
             courseName,
             courseId,
@@ -124,20 +141,18 @@
             item.answer.replace(/"/g, '""')
         ].join(TAB)).join('\n');
 
-        const blob = new Blob(["\uFEFF" + csvContent], { 
-            type: 'text/csv;charset=utf-8;' 
-        });
-        
+        const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+        // 文件名根据课程名称和当前日期命名
+        const fileName = `${courseName}_${new Date().toISOString().slice(0,10)}.csv`;
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = `chaoxing_${new Date().toISOString().slice(0,10)}.csv`;
+        link.download = fileName;
         link.click();
     };
 
     // ================= Excel导出功能 =================
     const exportToExcel = (data) => {
-        const { courseName, courseId } = getCourseInfo();  // 获取课程信息
-        // 传入 {skipHeader:true} 以去掉表头
+        const { courseName, courseId } = getCourseInfo();
         const worksheet = XLSX.utils.json_to_sheet(data.map(item => ({
             '课程名称': courseName,
             '课程ID': courseId,
@@ -149,7 +164,8 @@
         
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, '题目数据');
-        XLSX.writeFile(workbook, `超星题目_${getFormattedDate()}.xlsx`);
+        const fileName = `超星题目_${courseName}_${getFormattedDate()}.xlsx`;
+        XLSX.writeFile(workbook, fileName);
     };
 
     // ================= 预览功能 =================
@@ -235,7 +251,7 @@
         btn.textContent = '解析题目';
         btn.style.cssText = `
             position: fixed; top: 70px; right: 20px; z-index: 99999;
-            padding: 12px 24px; background: #239b56 ; color: white;
+            padding: 12px 24px; background: #239b56; color: white;
             border: none; border-radius: 4px; cursor: pointer;
             box-shadow: 0 3px 6px rgba(0,0,0,0.16); transition: 0.2s;
         `;
