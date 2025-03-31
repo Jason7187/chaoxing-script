@@ -109,15 +109,8 @@
         const options = Array.from(container.querySelectorAll('.mark_letter li'))
             .map(li => li.textContent.trim());
 
-        let answer = '';
-
-        // 判断选项并输出相应答案，删除字母，直接输出选项内容
-        options.forEach(opt => {
-            const answerText = opt.replace(/^[A-D][．.。]?\s*/, '').trim();
-            if (/正确|对|错误|错/.test(answerText)) {
-                answer = answerText;
-            }
-        });
+        // 直接提取rightAnswerContent中的文本内容，不做任何转换
+        const answer = container.querySelector('.rightAnswerContent')?.textContent.trim() || '';
 
         return {
             type: '判断题',
