@@ -8,6 +8,7 @@
 // @match        *://mooc1.chaoxing.com/exam-ans/exam/*
 // @grant        GM_registerMenuCommand
 // @grant        GM_notification
+// @updateURL    https://github.com/Jason7187/chaoxing-script/blob/main/%E2%80%8CCompile.user.js
 // @require      https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js
 
 // ==/UserScript==
