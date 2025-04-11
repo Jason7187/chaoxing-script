@@ -9,8 +9,8 @@
 // @icon         https://maxpcimg.online/i/2025/04/11/67f8656abe8db.png
 // @grant        GM_registerMenuCommand
 // @grant        GM_notification
-// @updateURL    https://raw.githubusercontent.com/Jason7187/chaoxing-script/main/collect.user.js
-// @downloadURL  https://raw.githubusercontent.com/Jason7187/chaoxing-script/main/collect.user.js
+// @updateURL    https://raw.githubusercontent.com/Jason7187/chaoxing-script/main/chaoxing-collect.user.js
+// @downloadURL  https://raw.githubusercontent.com/Jason7187/chaoxing-script/main/chaoxing-collect.user.js
 // @require      https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js
 
 // ==/UserScript==
