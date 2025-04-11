@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         超星自测作业题目采集器
-// @namespace    https://github.com/Jason7187/chaoxing-script
+// @namespace    题目采集
 // @version      1.0.2
 // @description  支持一键解析课程题目，智能识别单选/多选/填空/判断等题型，可导出为CSV/Excel格式。提供可视化预览  -- 对新版自测及作业适配
 // @author       Jason7187
