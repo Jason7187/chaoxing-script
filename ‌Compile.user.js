@@ -2,10 +2,11 @@
 // @name         超星自测作业题目采集器
 // @namespace    题目采集
 // @version      1.0
-// @description  支持一键解析课程题目，智能识别单选/多选/填空/判断等题型，可导出为CSV/Excel格式。提供可视化预览  -- 对新版自测及作业部分适配
+// @description  支持一键解析课程题目，智能识别单选/多选/填空/判断等题型，可导出为CSV/Excel格式。提供可视化预览  -- 对新版自测及作业适配
 // @author       Jason7187
 // @match        *://mooc1.chaoxing.com/mooc-ans/mooc2/work/*
 // @match        *://mooc1.chaoxing.com/exam-ans/exam/*
+// @icon         https://maxpcimg.online/i/2025/04/11/67f8614bda5e2.png
 // @grant        GM_registerMenuCommand
 // @grant        GM_notification
 // @updateURL    https://github.com/Jason7187/chaoxing-script/blob/main/%E2%80%8CCompile.user.js
